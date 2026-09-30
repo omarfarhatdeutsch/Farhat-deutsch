@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الألمانية مع فرحات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F6FB;--card:#fff;--ink:#10263F;--mut:#5B6F86;--blue:#1F5FA8;--ok:#2E8B57;--bad:#C8372D;--line:#D6E1EE;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1826;--card:#14263A;--ink:#EAF1F9;--mut:#93A8C0;--blue:#5FA0E8;--line:#24405C}}
+:root[data-theme="dark"]{--bg:#0C1826;--card:#14263A;--ink:#EAF1F9;--mut:#93A8C0;--blue:#5FA0E8;--line:#24405C}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',system-ui,sans-serif;line-height:1.6}
+main{max-width:480px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.top h1{font-size:22px;font-weight:800;margin:0;color:var(--blue)}
+.stats{display:flex;gap:14px;font-weight:600}
+.lesson{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:right;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;font:inherit;color:inherit;cursor:pointer}
+.lesson b{font-size:18px}.lesson small{color:var(--mut);display:block}
+.lesson.done{border-color:var(--ok)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 24px}
+.bar i{display:block;height:100%;background:var(--blue);transition:width .3s}
+.q{background:var(--card);border-radius:20px;padding:24px;text-align:center;margin-bottom:16px;border:2px solid var(--line)}
+.q .de{font-size:34px;font-weight:800;direction:ltr}
+.q p{margin:0 0 8px;color:var(--mut)}
+.say{margin-top:10px;border:0;background:var(--blue);color:#fff;border-radius:999px;padding:8px 18px;font:inherit;font-weight:600;cursor:pointer}
+.opt{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:18px;font-weight:600;cursor:pointer}
+.opt small{display:block;font-size:13px;color:var(--mut);font-weight:400}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.go{width:100%;padding:14px;border:0;border-radius:14px;background:var(--blue);color:#fff;font:inherit;font-size:18px;font-weight:800;cursor:pointer;margin-top:6px}
+.fb{font-weight:800;text-align:center;margin:6px 0}
+.big{text-align:center;padding:40px 0}.big h2{font-size:28px;margin:0 0 8px}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const L=[
+{t:"التحيات",w:[["Hallo","مرحبا","Salut"],["Guten Morgen","صباح الخير","Bonjour"],["Guten Abend","مساء الخير","Bonsoir"],["Tschüss","مع السلامة","Au revoir"],["Danke","شكرا","Merci"]]},
+{t:"التعارف",w:[["Ich heiße","اسمي","Je m'appelle"],["Wie geht's?","كيف حالك؟","Ça va ?"],["Gut","بخير","Bien"],["Bitte","من فضلك","S'il vous plaît"],["Entschuldigung","المعذرة","Excusez-moi"]]},
+{t:"الأرقام من 1 إلى 5",w:[["eins","واحد","un"],["zwei","اثنان","deux"],["drei","ثلاثة","trois"],["vier","أربعة","quatre"],["fünf","خمسة","cinq"]]}
+];
+const ALL=L.flatMap(x=>x.w);
+let S={xp:0,streak:0,last:"",done:[]};
+try{Object.assign(S,JSON.parse(localStorage.getItem("dz")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("dz",JSON.stringify(S))}catch(e){}};
+const day=d=>new Date(d).toDateString();
+const streak=()=>(S.last===day(Date.now())||S.last===day(Date.now()-864e5))?S.streak:0;
+function touch(){if(S.last===day(Date.now()))return;S.streak=S.last===day(Date.now()-864e5)?S.streak+1:1;S.last=day(Date.now());save()}
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="de-DE";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+const app=document.getElementById("app");
+const head=()=>`<div class="top"><h1>الألمانية مع فرحات</h1><div class="stats"><span>🔥 ${streak()}</span><span>⭐ ${S.xp}</span></div></div>`;
+
+function home(){
+app.innerHTML=head()+`<p>الوحدة 1: أساسيات اللغة. أكمل الدروس بالترتيب.</p>`+L.map((l,i)=>`<button class="lesson ${S.done.includes(i)?"done":""}" onclick="start(${i})"><span><b>الدرس ${i+1}: ${l.t}</b><small>${l.w.length} كلمات · 10 أسئلة</small></span><span>${S.done.includes(i)?"✅":"◀"}</span></button>`).join("");
+}
+
+let G;
+function start(i){
+const q=[];L[i].w.forEach(p=>{q.push({k:"a",p});q.push({k:"b",p})});
+G={i,q:shuf(q),n:0,ok:0};ask();
+}
+function ask(){
+const {q,n}=G;
+if(n>=q.length)return end();
+const {k,p}=q[n];
+const opts=shuf([p,...shuf(ALL.filter(x=>x[0]!==p[0])).slice(0,3)]);
+const prompt=k==="a"
+?`<p>ماذا تعني هذه الكلمة؟</p><div class="de">${p[0]}</div><button class="say" onclick="say('${p[0].replace(/'/g,"\\'")}')">🔊 استمع</button>`
+:`<p>كيف نقول بالألمانية؟</p><div class="de" style="direction:rtl">${p[1]}</div><small>${p[2]}</small>`;
+app.innerHTML=head()+`<div class="bar"><i style="width:${n/q.length*100}%"></i></div><div class="q">${prompt}</div>`+
+opts.map((o,j)=>k==="a"?`<button class="opt" data-ok="${o===p}" onclick="pick(this)">${o[1]}<small>${o[2]}</small></button>`:`<button class="opt" data-ok="${o===p}" style="direction:ltr" onclick="pick(this)">${o[0]}</button>`).join("")+`<div id="fb"></div>`;
+if(k==="a")say(p[0]);
+}
+function pick(b){
+const all=[...document.querySelectorAll(".opt")];
+if(all[0].disabled)return;
+all.forEach(x=>{x.disabled=true;if(x.dataset.ok==="true")x.classList.add("ok")});
+const good=b.dataset.ok==="true";
+if(good){G.ok++;S.xp+=10;save()}else b.classList.add("bad");
+const p=G.q[G.n].p;
+document.getElementById("fb").innerHTML=`<div class="fb" style="color:var(${good?"--ok":"--bad"})">${good?"صحيح! +10 نقاط":"الصحيح: "+p[0]+" = "+p[1]}</div><button class="go" onclick="G.n++;ask()">التالي</button>`;
+}
+function end(){
+touch();
+if(!S.done.includes(G.i))S.done.push(G.i);save();
+app.innerHTML=head()+`<div class="big"><h2>أحسنت! 🎉</h2><p>أجبت صح على ${G.ok} من ${G.q.length}</p></div><button class="go" onclick="home()">العودة للدروس</button>`;
+}
+home();
+</script>
+</body>
+</html>
